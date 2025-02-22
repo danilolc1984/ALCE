@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Remessas</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f4;
+        }
+
+         /* Menu */
+         .menu {
+            background: #004d99;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        /* Estilização dos links */
+        .menu a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            border-radius: 5px;
+        }
+
+        /* Efeito hover */
+        .menu a:hover {
+            background: #003366;
+            transform: scale(1.1);
+        }
+
+        /* Ícones do menu */
+        .icon {
+            width: 20px;
+            height: 20px;
+            filter: brightness(0) invert(1);
+            /* Deixa os ícones brancos */
+        }
+
+        .container {
+            width: 90%;
+            margin: 20px auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #004d99;
+            margin-bottom: 20px;
+        }
+
+        /* Indicadores */
+        .dashboard {
+            display: flex;
+            justify-content: space-around;
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 15%;
+        }
+
+        /* Tabela */
+        table {
+            width: 100%;
+            background: white;
+            border-collapse: collapse;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        th {
+            background: #004d99;
+            color: white;
+        }
+
+        /* Status */
+        .status-circle {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .aprovado { background: #4CAF50; }
+        .pendente { background: #FFC107; }
+        .critico { background: #FF5722; }
+
+        .btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            background: #004d99;
+            white-space: nowrap;
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .btn:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="menu">
+        <a href="./dashboard.html">
+            <img src="icons/dashboard.svg" class="icon"> Dashboard
+        </a>
+        <a href="./split.html">
+            <img src="icons/split.svg" class="icon"> Split
+        </a>
+        <a href="./agendamento.html">
+            <img src="icons/agendamento.svg" class="icon"> Agendamento
+        </a>
+        <a href="./remessas.html">
+            <img src="icons/remessas.svg" class="icon"> Remessas
+        </a>
+        <a href="./estoque.html">
+            <img src="icons/estoque.svg" class="icon"> Apontamento
+        </a>
+        <a href="./controle.html">
+            <img src="icons/controle.svg" class="icon"> Parametrização
+        </a>
+    </div>
+
+    <div class="container">
+        <h1>Gestão de Remessas</h1>
+
+        <!-- Indicadores -->
+        <div class="dashboard">
+            <div class="card">
+                <h2>Total de Remessas</h2>
+                <p id="totalRemessas">12</p>
+                <canvas id="graficoRemessas"></canvas>
+            </div>
+            <div class="card">
+                <h2>Remessas Pendentes</h2>
+                <p id="remessasPendentes">4</p>
+                <canvas id="graficoPendentes"></canvas>
+            </div>
+            <div class="card">
+                <h2>Remessas Enviadas ao OTM</h2>
+                <p id="remessasEnviadas">8</p>
+                <canvas id="graficoOTM"></canvas>
+            </div>
+        </div>
+
+        <!-- Tabela de Remessas -->
+        <h2>Lista de Remessas</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Cliente</th>
+                    <th>OV</th>
+                    <th>Centro de Distribuição</th>
+                    <th>Tipo de Estoque</th>
+                    <th>Volume</th>
+                    <th>Agendamento</th>
+                    <th>Apontamento</th>
+                    <th>Split</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Cliente A</td>
+                    <td>OV001</td>
+                    <td>CD São Paulo</td>
+                    <td>Físico</td>
+                    <td>8.000 kg</td>
+                    <td><span class="status-circle aprovado"></span> Aprovado</td>
+                    <td><span class="status-circle aprovado"></span> Aprovado</td>
+                    <td><span class="status-circle aprovado"></span> Aprovado</td>
+                    <td><button class="btn" onclick="enviarOTM(this)">Enviar ao OTM</button></td>
+                </tr>
+                <tr>
+                    <td>Cliente B</td>
+                    <td>OV002</td>
+                    <td>CD Rio de Janeiro</td>
+                    <td>Virtual</td>
+                    <td>12.000 kg</td>
+                    <td><span class="status-circle pendente"></span> Pendente</td>
+                    <td><span class="status-circle aprovado"></span> Aprovado</td>
+                    <td><span class="status-circle aprovado"></span> Aprovado</td>
+                    <td><button class="btn" disabled>Enviar ao OTM</button></td>
+                </tr>
+                <tr>
+                    <td>Cliente C</td>
+                    <td>OV003</td>
+                    <td>CD Belo Horizonte</td>
+                    <td>Físico</td>
+                    <td>10.000 kg</td>
+                    <td><span class="status-circle aprovado"></span> Aprovado</td>
+                    <td><span class="status-circle pendente"></span> Pendente</td>
+                    <td><span class="status-circle aprovado"></span> Aprovado</td>
+                    <td><button class="btn" disabled>Enviar ao OTM</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function enviarOTM(button) {
+            alert("Remessa enviada ao OTM!");
+            button.disabled = true;
+            button.innerText = "Enviado";
+        }
+
+        function criarGrafico(id, data, color) {
+            const ctx = document.getElementById(id).getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Enviado', 'Pendente'],
+                    datasets: [{
+                        data: data,
+                        backgroundColor: color
+                    }]
+                }
+            });
+        }
+
+        criarGrafico('graficoRemessas', [8, 4], ['#4CAF50', '#FFC107']);
+        criarGrafico('graficoPendentes', [4, 8], ['#FF5722', '#4CAF50']);
+        criarGrafico('graficoOTM', [8, 4], ['#004d99', '#FFC107']);
+    </script>
+
+</body>
+</html>

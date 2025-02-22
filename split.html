@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Split de OVs</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f4;
+        }
+
+           /* Menu */
+           .menu {
+            background: #004d99;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        /* Estilização dos links */
+        .menu a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            border-radius: 5px;
+        }
+
+        /* Efeito hover */
+        .menu a:hover {
+            background: #003366;
+            transform: scale(1.1);
+        }
+
+        /* Ícones do menu */
+        .icon {
+            width: 20px;
+            height: 20px;
+            filter: brightness(0) invert(1);
+            /* Deixa os ícones brancos */
+        }
+        .container {
+            width: 90%;
+            margin: 20px auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #004d99;
+            margin-bottom: 20px;
+        }
+
+        /* Cards de Indicadores */
+        .dashboard {
+            display: flex;
+            justify-content: space-around;
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 15%;
+        }
+
+        /* Tabela Principal */
+        table {
+            width: 100%;
+            background: white;
+            border-collapse: collapse;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        th {
+            background: #004d99;
+            color: white;
+        }
+
+        /* Estilo das bolinhas de status */
+        .status-circle {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .aprovado { background: #4CAF50; }
+        .pendente { background: #FFC107; }
+        .atraso { background: #FF5722; }
+
+        .btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            background: #004d99;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            opacity: 0.8;
+        }
+
+        /* Remessas */
+        .remessas {
+            display: none;
+            background: #eef2f7;
+        }
+
+        .remessas table {
+            width: 95%;
+            margin: 10px auto;
+            border: 1px solid #ccc;
+        }
+
+        .remessas th {
+            background: #0066cc;
+        }
+
+    </style>
+</head>
+<body>
+
+ 
+    <div class="menu">
+        <a href="./dashboard.html">
+            <img src="icons/dashboard.svg" class="icon"> Dashboard
+        </a>
+        <a href="./split.html">
+            <img src="icons/split.svg" class="icon"> Split
+        </a>
+        <a href="./agendamento.html">
+            <img src="icons/agendamento.svg" class="icon"> Agendamento
+        </a>
+        <a href="./remessas.html">
+            <img src="icons/remessas.svg" class="icon"> Remessas
+        </a>
+        <a href="./estoque.html">
+            <img src="icons/estoque.svg" class="icon"> Apontamento
+        </a>
+        <a href="./controle.html">
+            <img src="icons/controle.svg" class="icon"> Parametrização
+        </a>
+    </div>
+
+    <div class="container">
+        <h1>Split de Ordens de Venda</h1>
+
+        <!-- Indicadores -->
+        <div class="dashboard">
+            <div class="card">
+                <h2>OVs Pendentes</h2>
+                <p id="ovsPendentes">15</p>
+                <canvas id="graficoOVs"></canvas>
+            </div>
+            <div class="card">
+                <h2>Volume Total Splitado</h2>
+                <p id="volumeSplit">35.000 kg</p>
+                <canvas id="graficoVolume"></canvas>
+            </div>
+            <div class="card">
+                <h2>Estoque Disponível</h2>
+                <p id="estoqueDisponivel">80.000 kg</p>
+                <canvas id="graficoEstoque"></canvas>
+            </div>
+        </div>
+
+        <!-- Tabela de OVs -->
+        <h2 style="margin-top: 30px;">Lista de OVs Pendentes para Split</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>OV</th>
+                    <th>Cliente</th>
+                    <th>Produto</th>
+                    <th>Volume</th>
+                    <th>Status</th>
+                    <th>Critério de Split</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>OV001</td>
+                    <td>Cliente A</td>
+                    <td>Produto X</td>
+                    <td>10.000 kg</td>
+                    <td><span id="span1" class="status-circle pendente"></span> <span id="text1">Pendente</span></td>
+                    <td>Volume + Rentabilidade</td>
+                    <td><button class="btn"  id="btn1 "onclick="realizarSplit('remessa1', 'span1', 'text1', 'btn1');">Realizar Split</button></td>
+                </tr>
+                <tr id="remessa1" class="remessas">
+                    <td colspan="7">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Remessa</th>
+                                    <th>Veículo</th>
+                                    <th>Volume</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Remessa 1</td>
+                                    <td>Truck</td>
+                                    <td>5.000 kg</td>
+                                </tr>
+                                <tr>
+                                    <td>Remessa 2</td>
+                                    <td>Truck</td>
+                                    <td>5.000 kg</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </tbody>
+            <tbody>
+                <tr>
+                    <td>OV001</td>
+                    <td>Cliente A</td>
+                    <td>Produto X</td>
+                    <td>10.000 kg</td>
+                    <td><span id="span2" class="status-circle pendente"></span> <span id="text2">Pendente</span></td>
+                    <td>Rota + Leadtime</td>
+                    <td><button class="btn"  id="btn2" onclick="realizarSplit('remessa2', 'span2', 'text2', 'btn2');">Realizar Split</button></td>
+                </tr>
+                <tr id="remessa2" class="remessas">
+                    <td colspan="7">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Remessa</th>
+                                    <th>Veículo</th>
+                                    <th>Volume</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Remessa 1</td>
+                                    <td>Truck</td>
+                                    <td>5.000 kg</td>
+                                </tr>
+                                <tr>
+                                    <td>Remessa 2</td>
+                                    <td>Truck</td>
+                                    <td>5.000 kg</td>
+                                </tr>
+                                <tr>
+                                    <td>Remessa 3</td>
+                                    <td>Truck</td>
+                                    <td>5.000 kg</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </tbody>
+            <tbody>
+                <tr>
+                    <td>OV001</td>
+                    <td>Cliente A</td>
+                    <td>Produto X</td>
+                    <td>10.000 kg</td>
+                    <td><span id="span3" class="status-circle pendente"></span > <span id="text3">Pendente </span></td>
+                    <td>Cliente prioritário</td>
+                    <td><button class="btn" id="btn3" onclick="realizarSplit('remessa3', 'span3', 'text3', 'btn3');" >Realizar Split</button></td>
+                </tr>
+                <tr id="remessa3" class="remessas">
+                    <td colspan="7">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Remessa</th>
+                                    <th>Veículo</th>
+                                    <th>Volume</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Remessa 1</td>
+                                    <td>Truck</td>
+                                    <td>5.000 kg</td>
+                                </tr>
+                                <tr>
+                                    <td>Remessa 2</td>
+                                    <td>Truck</td>
+                                    <td>5.000 kg</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+
+    <script>
+       function toggleRemessas(id) {
+            var row = document.getElementById(id);
+            row.style.display = row.style.display === "table-row" ? "none" : "table-row";
+        }
+        function realizarSplit(remessaId, statusId, textId, botaoId) {
+            // Abre a tabela de remessas
+            toggleRemessas(remessaId);
+
+            // Atualiza o status para "Aprovado"
+            var status = document.getElementById(statusId);
+            var text = document.getElementById(textId);
+            status.classList.remove('pendente');
+            status.classList.add('aprovado');
+            text.innerHTML = "Splitado";
+
+            // Desativa o botão e muda a cor para cinza
+            var botao = document.getElementById(botaoId);
+       
+        }
+
+        function criarGrafico(id, data, color) {
+            const ctx = document.getElementById(id).getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Truck', 'Bitrem', 'Rodotrem'],
+                    datasets: [{
+                        data: data,
+                        backgroundColor: color
+                    }]
+                }
+            });
+        }
+
+        criarGrafico('graficoOVs', [10, 5], ['#4CAF50', '#FFC107']);
+        criarGrafico('graficoVolume', [15000, 20000], ['#004d99', '#ff9800']);
+        criarGrafico('graficoEstoque', [60000, 20000], ['#4CAF50', '#FFC107']);
+    </script>
+
+</body>
+</html>

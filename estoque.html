@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apontamento de Estoque</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f4;
+        }
+
+          /* Menu */
+          .menu {
+            background: #004d99;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        /* Estilização dos links */
+        .menu a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            border-radius: 5px;
+        }
+
+        /* Efeito hover */
+        .menu a:hover {
+            background: #003366;
+            transform: scale(1.1);
+        }
+
+        /* Ícones do menu */
+        .icon {
+            width: 20px;
+            height: 20px;
+            filter: brightness(0) invert(1);
+            /* Deixa os ícones brancos */
+        }
+        .container {
+            width: 90%;
+            margin: 20px auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #004d99;
+            margin-bottom: 20px;
+        }
+
+        /* Tabela */
+        table {
+            width: 100%;
+            background: white;
+            border-collapse: collapse;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        th {
+            background: #004d99;
+            color: white;
+        }
+
+        .status {
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .status-circle {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .apontado {
+            background: #4CAF50;
+        }
+
+        .pendente {
+            background: #FFC107;
+        }
+
+        .btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            background: #004d99;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            opacity: 0.8;
+        }
+
+        /* Formulário */
+        .form-container {
+            background: #eef2f7;
+            padding: 15px;
+            display: none;
+            border-radius: 5px;
+        }
+
+        .form-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .form-group div {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .form-container label {
+            font-weight: bold;
+            display: block;
+            margin: 5px 0;
+        }
+
+        .form-container select,
+        .form-container input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .form-container input[disabled],
+        .form-container select[disabled] {
+            background: #ddd;
+        }
+         /* Indicadores */
+         .dashboard {
+            display: flex;
+            justify-content: space-around;
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 15%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Menu -->
+    <div class="menu">
+        <a href="./dashboard.html">
+            <img src="icons/dashboard.svg" class="icon"> Dashboard
+        </a>
+        <a href="./split.html">
+            <img src="icons/split.svg" class="icon"> Split
+        </a>
+        <a href="./agendamento.html">
+            <img src="icons/agendamento.svg" class="icon"> Agendamento
+        </a>
+        <a href="./remessas.html">
+            <img src="icons/remessas.svg" class="icon"> Remessas
+        </a>
+        <a href="./estoque.html">
+            <img src="icons/estoque.svg" class="icon"> Apontamento
+        </a>
+        <a href="./controle.html">
+            <img src="icons/controle.svg" class="icon"> Parametrização
+        </a>
+    </div>
+
+    <div class="container">
+        <h1>Gestão de Apontamento de Estoque</h1>
+
+        <!-- Indicadores -->
+        <div class="dashboard">
+            <div class="card">
+                <h2>Estoque Apontado</h2>
+                <p id="estoqueApontado">85.000 kg</p>
+                <canvas id="graficoApontado"></canvas>
+            </div>
+            <div class="card">
+                <h2>OVs Pendentes</h2>
+                <p id="ovsPendentes">12</p>
+                <canvas id="graficoPendentes"></canvas>
+            </div>
+            <div class="card">
+                <h2>Alertas de Estoque</h2>
+                <p class="status"><span class="status-circle critico"></span> 3 Centros Críticos</p>
+                <canvas id="graficoAlerta"></canvas>
+            </div>
+        </div>
+        <!-- Tabela de Clientes e OVs -->
+        <h2>Lista OV's</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Cliente</th>
+                    <th>OV</th>
+                    <th>Remessas</th>
+                    <th>Centro de Distribuição</th>
+                    <th>Tipo de Estoque</th>
+                    <th>Volume</th>
+                    <th>Status</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                <!-- Cliente A -->
+                <tr>
+                    <td rowspan="3">Cliente A</td>
+                </tr>
+                <td rowspan="2">OV001</td>
+                <td>OV001RM002</td>
+                <td>CD São Paulo</td>
+                <td>Físico</td>
+                <td>8.000 kg</td>
+                <td class="status"><span class="status-circle pendente"></span> Pendente</td>
+                <td><button class="btn" onclick="toggleApontamento('form1')">Apontar</button></td>
+                </tr>
+                <tr id="form1" class="form-container">
+                    <td colspan="6">
+                        <div class="form-group">
+                            <div>
+                                <label>Data de Agendamento:</label>
+                                <input type="date" value="2025-02-25" disabled>
+                            </div>
+                            <div>
+                                <label>Tipo de Agendamento:</label>
+                                <select disabled>
+                                    <option>WhatsApp</option>
+                                    <option>Email</option>
+                                    <option>Telefone</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>ID do Agendamento:</label>
+                                <input type="text" value="AGD-20250225" disabled>
+                            </div>
+                            <div>
+                                <label>Nota InfoAgenda:</label>
+                                <input type="text">
+                            </div>
+                        </div>
+                        <button class="btn">Confirmar Apontamento</button>
+                    </td>
+                </tr>
+
+                <!-- OV sem remessas -->
+                <tr>
+                    <td>OV001RM001</td>
+                    <td>CD Rio de Janeiro</td>
+                    <td>Virtual</td>
+                    <td>12.000 kg</td>
+                    <td class="status"><span class="status-circle apontado"></span> Apontado</td>
+                    <td>✔</td>
+                </tr>
+
+                <!-- Cliente B -->
+                <tr>
+                    <td rowspan="2">Cliente B</td>
+                    <td rowspan="2">OV002</td>
+                    <td rowspan="2">OV002RM001</td>
+                    <td>CD São Paulo</td>
+                    <td>Físico</td>
+                    <td>10.000 kg</td>
+                    <td class="status"><span class="status-circle pendente"></span> Pendente</td>
+                    <td><button class="btn" onclick="toggleApontamento('form2')">Apontar</button></td>
+                </tr>
+                <tr id="form2" class="form-container">
+                    <td colspan="6">
+                        <div class="form-group">
+                            <div>
+                                <label>Data de Agendamento:</label>
+                                <input type="date" value="2025-03-15" disabled>
+                            </div>
+                            <div>
+                                <label>Tipo de Agendamento:</label>
+                                <select disabled>
+                                    <option>Email</option>
+                                    <option>WhatsApp</option>
+                                    <option>Telefone</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>ID do Agendamento:</label>
+                                <input type="text" value="AGD-20250315" disabled>
+                            </div>
+                            <div>
+                                <label>Nota InfoAgenda:</label>
+                                <input type="text">
+                            </div>
+                        </div>
+                        <button class="btn">Confirmar Apontamento</button>
+                    </td>
+                </tr>
+
+
+                <!-- Cliente C -->
+                <tr>
+                </tr>
+                <td rowspan="3">Cliente C</td>
+                </tr>
+                <td rowspan="2">OV003</td>
+                <td>OV001RM002</td>
+                <td>CD São Paulo</td>
+                <td>Físico</td>
+                <td>8.000 kg</td>
+                <td class="status"><span class="status-circle pendente"></span> Pendente</td>
+                <td><button class="btn" onclick="toggleApontamento('form3')">Apontar</button></td>
+                </tr>
+                <tr id="form3" class="form-container">
+                    <td colspan="6">
+                        <div class="form-group">
+                            <div>
+                                <label>Data de Agendamento:</label>
+                                <input type="date" value="2025-02-25" disabled>
+                            </div>
+                            <div>
+                                <label>Tipo de Agendamento:</label>
+                                <select disabled>
+                                    <option>Telefone</option>
+                                    <option>WhatsApp</option>
+                                    <option>Email</option>
+                                 
+                                </select>
+                            </div>
+                            <div>
+                                <label>ID do Agendamento:</label>
+                                <input type="text" value="AGD-20250228" disabled>
+                            </div>
+                            <div>
+                                <label>Nota InfoAgenda:</label>
+                                <input type="text">
+                            </div>
+                        </div>
+                        <button class="btn">Confirmar Apontamento</button>
+                    </td>
+                </tr>
+                <!-- OV sem remessas -->
+                <tr>
+                    <td>OV001RM001</td>
+                    <td>CD Rio de Janeiro</td>
+                    <td>Virtual</td>
+                    <td>12.000 kg</td>
+                    <td class="status"><span class="status-circle pendente"></span> Pendente</td>
+                    <td><button class="btn" onclick="toggleApontamento('form4')">Apontar</button></td>
+                </tr>
+                <tr id="form4" class="form-container">
+                    <td colspan="6">
+                        <div class="form-group">
+                            <div>
+                                <label>Data de Agendamento:</label>
+                                <input type="date" value="2025-03-25" disabled>
+                            </div>
+                            <div>
+                                <label>Tipo de Agendamento:</label>
+                                <select disabled>
+                                    <option>Email</option>
+                                    <option>WhatsApp</option>
+                                    <option>Telefone</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>ID do Agendamento:</label>
+                                <input type="text" value="AGD-20250226" disabled>
+                            </div>
+                            <div>
+                                <label>Nota InfoAgenda:</label>
+                                <input type="text">
+                            </div>
+                        </div>
+                        <button class="btn">Confirmar Apontamento</button>
+                </tr>
+
+
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function toggleApontamento(formId) {
+            var form = document.getElementById(formId);
+            form.style.display = form.style.display === "table-row" ? "none" : "table-row";
+        }
+
+        function criarGrafico(id, data, color) {
+            const ctx = document.getElementById(id).getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Apontado', 'Pendente'],
+                    datasets: [{
+                        data: data,
+                        backgroundColor: color
+                    }]
+                }
+            });
+        }
+
+        criarGrafico('graficoApontado', [70000, 15000], ['#4CAF50', '#FFC107']);
+        criarGrafico('graficoPendentes', [10, 2], ['#004d99', '#ff9800']);
+        criarGrafico('graficoAlerta', [3, 10], ['#FF5722', '#4CAF50']);
+    </script>
+
+</body>
+
+</html>

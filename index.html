@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Gestão de Estoque</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(to right, #004d99, #003366);
+        }
+
+        .login-wrapper {
+            display: flex;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            width: 700px;
+            max-width: 90%;
+        }
+
+        .login-image {
+            background: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            flex: 1;
+        }
+
+        .login-image img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .login-container {
+            padding: 40px;
+            flex: 1;
+            text-align: center;
+        }
+
+        .login-container h2 {
+            margin-bottom: 20px;
+            color: #004d99;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #004d99;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background: #004d99;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            background: #003366;
+        }
+
+        .error {
+            color: red;
+            margin-top: 10px;
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .login-wrapper {
+                flex-direction: column;
+            }
+
+            .login-image {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-wrapper">
+        <!-- Área da imagem -->
+        <div class="login-image">
+            <img src="logo-alce.png" alt="Logo ALCE">
+        </div>
+
+        <!-- Formulário de login -->
+        <div class="login-container">
+            <h2>Login</h2>
+            <form id="loginForm">
+                <div class="input-group">
+                    <label for="username">Usuário</label>
+                    <input type="text" id="username" value="admin">
+                </div>
+                <div class="input-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" value="admin">
+                </div>
+                <button type="submit" class="login-btn">Entrar</button>
+                <p class="error" id="errorMsg">Usuário ou senha inválidos!</p>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            if (username === "admin" && password === "admin") {
+                window.location.href = "dashboard.html"; // Redireciona para o painel principal
+            } else {
+                document.getElementById("errorMsg").style.display = "block";
+            }
+        });
+    </script>
+
+</body>
+
+</html>

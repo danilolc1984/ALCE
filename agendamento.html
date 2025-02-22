@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+       <title>Gestão de Agendamentos</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f4;
+        }
+
+        /* Menu */
+        .menu {
+            background: #004d99;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        /* Estilização dos links */
+        .menu a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            border-radius: 5px;
+        }
+
+        /* Efeito hover */
+        .menu a:hover {
+            background: #003366;
+            transform: scale(1.1);
+        }
+
+        /* Ícones do menu */
+        .icon {
+            width: 20px;
+            height: 20px;
+            filter: brightness(0) invert(1);
+            /* Deixa os ícones brancos */
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .menu {
+                flex-wrap: wrap;
+                padding: 10px;
+            }
+
+            .menu a {
+                font-size: 14px;
+                padding: 8px;
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .icon {
+                width: 18px;
+                height: 18px;
+            }
+        }
+
+        .container {
+            width: 90%;
+            margin: 20px auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #004d99;
+            margin-bottom: 20px;
+        }
+
+        /* Cronograma estilo Project */
+        .cronograma {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            text-align: center;
+            overflow: hidden;
+            /* Removendo scroll */
+        }
+
+        .cronograma h2 {
+            color: #004d99;
+            margin-bottom: 15px;
+        }
+
+        .timeline {
+            display: flex;
+            justify-content: space-between;
+            background: #eef2f7;
+            padding: 15px;
+            border-radius: 5px;
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        .time-slot {
+            background: #ffffff;
+            padding: 15px;
+            text-align: center;
+            border-radius: 5px;
+            min-width: 200px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            position: relative;
+        }
+
+        .ov-box {
+            background: #004d99;
+            color: white;
+            padding: 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            position: absolute;
+            top: 35px;
+            left: 10px;
+            right: 10px;
+            text-align: center;
+        }
+
+        /* Tabela */
+        table {
+            width: 100%;
+            background: white;
+            border-collapse: collapse;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        th {
+            background: #004d99;
+            color: white;
+        }
+
+        /* Status */
+        .status {
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .status-circle {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .aprovado {
+            background: #4CAF50;
+        }
+
+        .pendente {
+            background: #FFC107;
+        }
+
+        .expirado {
+            background: #FF5722;
+        }
+
+        .btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            background: #004d99;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            opacity: 0.8;
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Formulário de Agendamento */
+        .form-container {
+            background: #eef2f7;
+            padding: 15px;
+            display: none;
+            border-radius: 5px;
+        }
+
+        .form-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .form-group div {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .form-container label {
+            font-weight: bold;
+            display: block;
+            margin: 5px 0;
+        }
+
+        .form-container select,
+        .form-container input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .form-container input[disabled],
+        .form-container select[disabled] {
+            background: #ddd;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="menu">
+        <a href="./dashboard.html">
+            <img src="icons/dashboard.svg" class="icon"> Dashboard
+        </a>
+        <a href="./split.html">
+            <img src="icons/split.svg" class="icon"> Split
+        </a>
+        <a href="./agendamento.html">
+            <img src="icons/agendamento.svg" class="icon"> Agendamento
+        </a>
+        <a href="./remessas.html">
+            <img src="icons/remessas.svg" class="icon"> Remessas
+        </a>
+        <a href="./estoque.html">
+            <img src="icons/estoque.svg" class="icon"> Apontamento
+        </a>
+        <a href="./controle.html">
+            <img src="icons/controle.svg" class="icon"> Parametrização
+        </a>
+    </div>
+
+    <div class="container">
+        <h1>Gestão de Agendamentos</h1>
+
+        <!-- Cronograma estilo Project -->
+        <div class="cronograma">
+            <h2>Cronograma de Agendamentos</h2>
+            <div class="timeline">
+                <div class="time-slot">25/02 - 09h<div class="ov-box">OV001 - Cliente A</div>
+                </div>
+                <div class="time-slot">25/02 - 14h<div class="ov-box">OV002 - Cliente B</div>
+                </div>
+                <div class="time-slot">26/02 - 11h<div class="ov-box">OV003 - Cliente C</div>
+                </div>
+                <div class="time-slot">27/02 - 09h<div class="ov-box">OV004 - Cliente A</div>
+                </div>
+                <div class="time-slot">28/02 - 14h<div class="ov-box">OV005 - Cliente B</div>
+                </div>
+                <div class="time-slot">29/02 - 11h<div class="ov-box">OV006 - Cliente C</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela de OVs -->
+        <h2>Lista de OVs Pendentes para Agendamento</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>OV</th>
+                    <th>Cliente</th>
+                    <th>Status</th>
+                    <th>Data Limite</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- OV 1 -->
+                <tr>
+                    <td>OV001</td>
+                    <td>Cliente A</td>
+                    <td class="status"><span id="status1" class="status-circle pendente"></span> <span
+                            id="text1">Pendente</span></td>
+                    <td>25/02/2025</td>
+                    <td><button class="btn" id="btn1"
+                            onclick="toggleAgendamento('form1', 'status1', 'text1', 'btn1')">Preferências de
+                            Agenda</button></td>
+                </tr>
+                <tr id="form1" class="form-container">
+                    <td colspan="5">
+                        <div class="form-group">
+                            <div>
+                                <label>Número de Tentativas:</label>
+                                <input type="number" value="3" disabled>
+                            </div>
+                            <div>
+                                <label>Preferência de Plataforma:</label>
+                                <select disabled>
+                                    <option>WhatsAPP</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Data Combinada por Remessa:</label>
+                                <input type="date" value="2025-02-25" disabled>
+                            </div>
+                            <div>
+                                <label>Pedido Apontado no Estoque?</label>
+                                <select disabled>
+                                    <option>Sim</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button class="btn">Tentativa de Agendamento Manual</button>
+                    </td>
+                </tr>
+            </tbody>
+            <tbody>
+                <!-- OV 2 -->
+                <tr>
+                    <td>OV001</td>
+                    <td>Cliente A</td>
+                    <td class="status"><span id="status2" class="status-circle pendente"></span> <span
+                            id="text2">Pendente</span></td>
+                    <td>25/02/2025</td>
+                    <td><button class="btn" id="btn2"
+                            onclick="toggleAgendamento('form2', 'status2', 'text2', 'btn2')">Preferências de
+                            Agenda</button></td>
+                </tr>
+                <tr id="form2" class="form-container">
+                    <td colspan="5">
+                        <div class="form-group">
+                            <div>
+                                <label>Número de Tentativas:</label>
+                                <input type="number" value="3" disabled>
+                            </div>
+                            <div>
+                                <label>Preferência de Plataforma:</label>
+                                <select disabled>
+                                    <option>Telefone</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Data Combinada por Remessa:</label>
+                                <input type="date" value="2025-03-12" disabled>
+                            </div>
+                            <div>
+                                <label>Pedido Apontado no Estoque?</label>
+                                <select disabled>
+                                    <option>Sim</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button class="btn">Tentativa de Agendamento Manual</button>
+                    </td>
+                </tr>
+            </tbody>
+            <tbody>
+                <!-- OV 3 -->
+                <tr>
+                    <td>OV002</td>
+                    <td>Cliente B</td>
+                    <td class="status"><span id="status3" class="status-circle pendente"></span> <span
+                            id="text3">Pendente</span></td>
+                    <td>25/02/2025</td>
+                    <td><button class="btn" id="btn3"
+                            onclick="toggleAgendamento('form3', 'status3', 'text3', 'btn3')">Preferências de
+                            Agenda</button></td>
+                </tr>
+                <tr id="form3" class="form-container">
+                    <td colspan="5">
+                        <div class="form-group">
+                            <div>
+                                <label>Número de Tentativas:</label>
+                                <input type="number" value="3" disabled>
+                            </div>
+                            <div>
+                                <label>Preferência de Plataforma:</label>
+                                <select disabled>
+                                    <option>Email</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Data Combinada por Remessa:</label>
+                                <input type="date" value="2025-03-25" disabled>
+                            </div>
+                            <div>
+                                <label>Pedido Apontado no Estoque?</label>
+                                <select disabled>
+                                    <option>Não</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button class="btn">Tentativa de Agendamento Manual</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function toggleAgendamento(formId) {
+            var form = document.getElementById(formId);
+            form.style.display = form.style.display === "table-row" ? "none" : "table-row";
+
+        }
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <title>Parametrização de Logística</title>
+    <script>
+        function addRow(tableId, rowHtml) {
+            let table = document.getElementById(tableId);
+            let newRow = table.insertRow(-1);
+            newRow.innerHTML = rowHtml;
+        }
+
+        function removeRow(button) {
+            let row = button.parentNode.parentNode;
+            let table = row.parentNode;
+            if (table.rows.length > 2) {
+                row.parentNode.removeChild(row);
+            } else {
+                alert("Você não pode remover todas as linhas!");
+            }
+        }
+
+        function toggleActivation(button) {
+            let row = button.parentNode.parentNode;
+            let inputs = row.querySelectorAll("input, select");
+
+            if (button.innerText === "Desativar") {
+                inputs.forEach(input => input.disabled = true);
+                button.innerText = "Ativar";
+            } else {
+                inputs.forEach(input => input.disabled = false);
+                button.innerText = "Desativar";
+            }
+        }
+    </script>
+
+    <style>
+        /* Reset geral */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Corpo da página */
+        body {
+            background-color: #f4f4f4;
+        }
+
+        /* Menu */
+        .menu {
+            background: #004d99;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        /* Estilização dos links */
+        .menu a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            border-radius: 5px;
+        }
+
+        /* Efeito hover */
+        .menu a:hover {
+            background: #003366;
+            transform: scale(1.1);
+        }
+
+        /* Ícones do menu */
+        .icon {
+            width: 20px;
+            height: 20px;
+            filter: brightness(0) invert(1);
+            /* Deixa os ícones brancos */
+        }
+
+        /* Estrutura principal */
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 80px auto 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        /* Cabeçalhos */
+        h1 {
+            text-align: center;
+            color: #004d99;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            color: #004d99;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #004d99;
+            padding-bottom: 5px;
+        }
+
+        h3 {
+            margin-top: 15px;
+            color: #005bb5;
+        }
+
+        /* Tabelas */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            border-bottom: none;
+            /* Garante que os elementos internos fiquem alinhados */
+        }
+
+        table {
+            width: 100%;
+            background: white;
+            border-collapse: collapse;
+            border-radius: 8px;
+            margin-top: 10px;
+            table-layout: auto;
+            /* Agora ajusta corretamente a largura das colunas */
+            word-wrap: break-word;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+            white-space: normal;
+            /* Permite quebras de linha */
+            word-break: break-word;
+            /* Garante que o texto se ajuste à célula */
+        }
+
+        th {
+            background: #004d99;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Alinhamento dos checkboxes */
+        td input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            vertical-align: middle;
+        }
+
+        /* Estilização do botão */
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 5px;
+            margin-top: 10px;
+            transition: background 0.3s;
+            text-align: center;
+            white-space: nowrap;
+            min-width: 150px;
+            /* Garante um tamanho mínimo para melhor visibilidade */
+            align-self: flex-start;
+            /* Mantém alinhado à esquerda */
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .titulo-secao{
+            margin-top: 20px;
+        }
+
+        /* Botão de desativação */
+        button.toggle-btn {
+            background: #ff5722;
+        }
+
+        button.toggle-btn:hover {
+            background: #e64a19;
+        }
+
+        /* Inputs e Selects */
+        input,
+        select {
+            padding: 8px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        input[type="date"] {
+            text-align: left;
+        }
+
+        /* Formulários */
+        .form-container {
+            background: #eef2f7;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .form-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .form-group div {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .form-container label {
+            font-weight: bold;
+            display: block;
+            margin: 5px 0;
+        }
+
+        .form-container select,
+        .form-container input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .form-container input[disabled],
+        .form-container select[disabled] {
+            background: #ddd;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            body {
+                padding: 100px 10px 10px;
+            }
+
+            .menu {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .menu a {
+                font-size: 14px;
+                padding: 8px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            table {
+                font-size: 14px;
+            }
+
+            .form-group {
+                flex-direction: column;
+            }
+
+            .table-container {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="menu">
+        <a href="./dashboard.html">
+            <img src="icons/dashboard.svg" class="icon"> Dashboard
+        </a>
+        <a href="./split.html">
+            <img src="icons/split.svg" class="icon"> Split
+        </a>
+        <a href="./agendamento.html">
+            <img src="icons/agendamento.svg" class="icon"> Agendamento
+        </a>
+        <a href="./remessas.html">
+            <img src="icons/remessas.svg" class="icon"> Remessas
+        </a>
+        <a href="./estoque.html">
+            <img src="icons/estoque.svg" class="icon"> Apontamento
+        </a>
+        <a href="./controle.html">
+            <img src="icons/controle.svg" class="icon"> Parametrização
+        </a>
+    </div>
+    <div class="container">
+        <h1>🔧 Parametrização de Logística</h1>
+
+        <hr>
+        <h2 class="titulo-secao">🚛 Split de Cargas & Veículos</h2>
+
+        <h3>Critérios de Split</h3>
+        <div class="table-container">
+            <table id="splitTable">
+                <tr>
+                    <th>Nome do Critério</th>
+                    <th>Critérios Selecionáveis</th>
+                    <th>Tipos de Veículo Vinculados</th>
+                    <th>Ações</th>
+                </tr>
+                <tr>
+                    <td><input type="text" placeholder="Split Rápido" disabled ></td>
+                    <td>
+                        <input type="checkbox" checked> Leadtime
+                        <input type="checkbox"> Footprint
+                        <input type="checkbox"> Proximidade do Cliente
+                        <input type="checkbox" checked> Maior Rentabilidade
+                    </td>
+                    <td>
+                        <input type="checkbox"> 3/4 – 30m³
+                        <input type="checkbox" checked> Toco – 30m³
+                        <input type="checkbox"> Truck – 55m³
+                        <input type="checkbox"> Carreta – 100m³
+                        <input type="checkbox" checked> Bitrem – 200m³
+                        <input type="checkbox"> Rodotrem – 220m³
+                    </td>
+                    <td><button class="btn remove-btn" onclick="removeRow(this)">Remover</button></td>
+                </tr>
+                <tr>
+                    <td><input type="text" placeholder="Split Default" disabled></td>
+                    <td>
+                        <input type="checkbox" checked> Leadtime
+                        <input type="checkbox"> Footprint
+                        <input type="checkbox" checked> Proximidade do Cliente
+                        <input type="checkbox"> Maior Rentabilidade
+                    </td>
+                    <td>
+                        <input type="checkbox"> 3/4 – 30m³
+                        <input type="checkbox"> Toco – 30m³
+                        <input type="checkbox" checked> Truck – 55m³
+                        <input type="checkbox"> Carreta – 100m³
+                        <input type="checkbox"> Bitrem – 200m³
+                        <input type="checkbox" checked> Rodotrem – 220m³
+                    </td>
+                    <td><button class="btn remove-btn" onclick="removeRow(this)">Remover</button></td>
+                </tr>
+            </table>
+        </div>
+        <button class="btn add-btn" onclick="addRow('splitTable', `
+            <td><input type='text' placeholder='Nome do Critério'></td>
+            <td>
+                <input type='checkbox'> Leadtime
+                <input type='checkbox'> Footprint
+                <input type='checkbox'> Proximidade do Cliente
+                <input type='checkbox'> Maior Rentabilidade
+            </td>
+            <td>
+                <input type='checkbox'> 3/4 – 30m³
+                <input type='checkbox'> Toco – 30m³
+                <input type='checkbox'> Truck – 55m³
+                <input type='checkbox'> Carreta – 100m³
+                <input type='checkbox'> Bitrem – 200m³
+                <input type='checkbox'> Rodotrem – 220m³
+            </td>
+            <td><button class='btn remove-btn' onclick='removeRow(this)'>Remover</button></td>
+        `)">Adicionar Critério</button>
+
+        <h2 class="titulo-secao">📦 Apontamento (Centros de Distribuição & Estoques)</h2>
+
+        <h3>Centros de Distribuição (Pré-definidos)</h3>
+        <div class="table-container">
+            <table id="cdTable">
+                <tr>
+                    <th>Centro de Distribuição</th>
+                    <th>Ativo</th>
+                    <th>Tipo de Estoque</th>
+                    <th>% Cliente Prioritário</th>
+                    <th>% Cliente Não Prioritário</th>
+                    <th>Alerta Crítico (%)</th>
+                    <th>Alerta Moderado (%)</th>
+                    <th>Alerta Informativo (%)</th>
+                    <th>Ações</th>
+                </tr>
+                <tr>
+                    <td>CD São Paulo</td>
+                    <td><input type="checkbox" checked></td>
+                    <td>Físico e Virtual</td>
+                    <td><input type="number" min="0" max="100" value="50"></td>
+                    <td><input type="number" min="0" max="100" value="50"></td>
+                    <td><input type="number" min="0" max="100" value="20"></td>
+                    <td><input type="number" min="0" max="100" value="40"></td>
+                    <td><input type="number" min="0" max="100" value="60"></td>
+                    <td><button class="btn toggle-btn" onclick="toggleActivation(this)">Desativar</button></td>
+                </tr>
+                <tr>
+                    <td>CD Minas</td>
+                    <td><input type="checkbox" checked="" disabled=""></td>
+                    <td>Físico</td>
+                    <td><input type="number" min="0" max="100" value="50" disabled=""></td>
+                    <td><input type="number" min="0" max="100" value="50" disabled=""></td>
+                    <td><input type="number" min="0" max="100" value="20" disabled=""></td>
+                    <td><input type="number" min="0" max="100" value="40" disabled=""></td>
+                    <td><input type="number" min="0" max="100" value="60" disabled=""></td>
+                    <td><button class="btn toggle-btn" onclick="toggleActivation(this)">Ativar</button></td>
+                </tr>
+                <tr>
+                    <td>CD BSB</td>
+                    <td><input type="checkbox" checked="" disabled=""></td>
+                    <td>Virtual</td>
+                    <td><input type="number" min="0" max="100" value="50" disabled=""></td>
+                    <td><input type="number" min="0" max="100" value="50" disabled=""></td>
+                    <td><input type="number" min="0" max="100" value="20" disabled=""></td>
+                    <td><input type="number" min="0" max="100" value="40" disabled=""></td>
+                    <td><input type="number" min="0" max="100" value="60" disabled=""></td>
+                    <td><button class="btn toggle-btn" onclick="toggleActivation(this)">Ativar</button></td>
+                </tr>
+            </table>
+        </div>
+
+        <hr>
+        <h2 class="titulo-secao">📅 Agendamento de Entregas</h2>
+
+        <h3>Clientes & Configuração</h3>
+        <div class="table-container">
+            <table id="clientesTable">
+                <tr>
+                    <th>Cliente</th>
+                    <th>Meios de Contato</th>
+                    <th>Aceita Mix de Produtos</th>
+                    <th>Prioridade de Atendimento</th>
+                    <th>Melhor Dia de Envio</th>
+                    <th>Ações</th>
+                </tr>
+                <tr>
+                    <td><input type="text" placeholder="Assai" disabled></td>
+                    <td>
+                        <input type="checkbox" checked> 📧 E-mail
+                        <input type="checkbox"> 📲 WhatsApp
+                        <input type="checkbox"> 📞 Ligação
+                        <input type="checkbox"> 🌐 Portal
+                        <input type="checkbox" checked> 🔄 EDI
+                    </td>
+                    <td><input type="checkbox" checked></td>
+                    <td>
+                        <select>
+                            <option selected >Alta</option>
+                            <option>Média</option>
+                            <option>Baixa</option>
+                        </select>
+                    </td>
+                    <td><input type="date" value="2025-04-12"></td>
+                    <td><button class="btn toggle-btn" onclick="toggleActivation(this)">Desativar</button></td>
+                </tr>
+                <tr>
+                    <td><input type="text" placeholder="Atacadão" disabled></td>
+                    <td>
+                        <input type="checkbox"> 📧 E-mail
+                        <input type="checkbox" checked> 📲 WhatsApp
+                        <input type="checkbox"> 📞 Ligação
+                        <input type="checkbox" checked> 🌐 Portal
+                        <input type="checkbox"> 🔄 EDI
+                    </td>
+                    <td><input type="checkbox"></td>
+                    <td>
+                        <select>
+                            <option>Alta</option>
+                            <option>Média</option select>
+                            <option selected>Baixa</option>
+                        </select>
+                    </td>
+                    <td><input type="date" value="2025-03-12"></td>
+                    <td><button class="btn toggle-btn" onclick="toggleActivation(this)">Desativar</button></td>
+                </tr>
+                <tr>
+                    <td><input type="text" placeholder="Caçula" disabled></td>
+                    <td>
+                        <input type="checkbox" checked> 📧 E-mail
+                        <input type="checkbox" checked> 📲 WhatsApp
+                        <input type="checkbox" checked> 📞 Ligação
+                        <input type="checkbox"> 🌐 Portal
+                        <input type="checkbox"> 🔄 EDI
+                    </td>
+                    <td><input type="checkbox" checked></td>
+                    <td>
+                        <select>
+                            <option>Alta</option>
+                            <option selected>Média</option>
+                            <option>Baixa</option>
+                        </select>
+                    </td>
+                    <td><input type="date" value="2025-03-12"></td>
+                    <td><button class="btn toggle-btn" onclick="toggleActivation(this)">Desativar</button></td>
+                </tr>
+            </table>
+        </div>
+
+        <hr>
+        <h2 class="titulo-secao">🛠 Controles Gerais</h2>
+
+        <h3>Travas & Fontes de OVs</h3>
+        <div class="table-container">
+            <table>
+                <tr>
+                    <th>Campo Obrigatório</th>
+                    <th>Obrigatório</th>
+                </tr>
+                <tr>
+                    <td>Data de Entrega</td>
+                    <td><input type="checkbox" checked></td>
+                </tr>
+                <tr>
+                    <td>Endereço Completo</td>
+                    <td><input type="checkbox" checked></td>
+                </tr>
+                <tr>
+                    <td>Forma de Pagamento</td>
+                    <td><input type="checkbox"></td>
+                </tr>
+            </table>
+        </div>
+
+        <br>
+        <button class="btn save-btn" onclick="alert('Parâmetros salvos com sucesso!')">✔️ Atualizar Configurações</button>
+        <button class="btn cancel-btn" onclick="alert('Parâmetros revertidos!'); location.reload();">✔️ Reverter Modificações</button>
+    </div>
+
+</body>
+
+</html>
